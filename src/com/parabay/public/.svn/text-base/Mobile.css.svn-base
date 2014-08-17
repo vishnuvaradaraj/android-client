@@ -1,0 +1,344 @@
+/**
+ * Applied to the main layout of the page.
+ */
+.Application-Reference-standard { 
+  height: 5px;
+  width: 5px;
+  zoom: 1;
+}
+}
+.Application-options {
+  padding: 6px 10px 0px 0px;
+}
+.Application-options .gwt-ListBox {
+  width: 150px;
+  font-size: 11px;
+  color: blue;
+  margin-left: 4px;
+}
+.Application-options td {
+  font-size: 12px;
+}
+.Application-options .gwt-ToggleButton {
+  width: 36px;
+  height: 16px;
+  margin: 3px 0px 0px 10px;
+  padding: 0px;
+}
+.Application-options .gwt-ToggleButton-down,
+.Application-options .gwt-ToggleButton-down-hovering {
+  cursor: default;
+}
+.Application-options .sc-ThemeButton-standard {
+  background: #d0e4f6;
+}
+.Application-options .sc-ThemeButton-chrome {
+  background: #ccc;
+}
+.Application-options .sc-ThemeButton-dark {
+  background: #3d3d3d;
+}
+
+.SliderPanel {
+  background: white;
+}
+
+.AboutPanel .PanelLabel * {
+  overflow: visible;
+  text-overflow: inherit;
+}
+
+.PanelLabel {
+  padding: 10px;
+  padding-right: 15px;
+  border-bottom: 1px solid rgb(217, 217, 217);
+  table-layout: fixed;
+}
+
+.PanelLabel * {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.aboutLabel {
+  margin-left: -5px;
+}
+
+.button {
+  height: 29px;
+  line-height: 29px;
+}
+
+.articleContents * {
+  font-size: 11pt;
+  font-weight: normal;
+  white-space: normal;
+}
+
+.header {
+  height: 44px;
+  width: 100%;
+  padding: 10px;
+}
+
+.last {
+  padding-bottom: 14px !important;
+}
+
+.logo {
+  float: left;
+  width: 91px;
+  height: 75px;
+}
+
+.snippit {
+  font-size: 11pt;
+  line-height: 11pt;
+  height: 33pt;
+  padding-left: 4px;
+  white-space: normal;
+}
+
+img {
+  max-width: 95%;
+}
+
+#loading {
+  display: none;
+}
+
+* {
+  font-family: Helvetica sans-serif;
+  font-size: 12pt;
+  color: black;
+}
+
+.PanelLabel {
+  border-bottom: 1px solid rgb(217, 217, 217);
+}
+
+.TransparentPanel {
+	background: none;
+}
+
+.WhitePanel {
+	background: white;
+}
+
+.backButton {
+    border-width: 0 8px 0 14px;
+    -webkit-border-image: url('iPhoneBackButton.png') 0 8 0 14;
+}
+
+.goButton {
+    border-width: 0 5px;
+    -webkit-border-image: url('iPhoneButton.png') 0 5 0 5;
+}
+
+.button {
+  cursor: pointer;
+  font-size: 10pt;
+  font-weight: normal;
+  vertical-align: middle;
+}
+
+.busy {
+  background: url('spinner.gif') no-repeat right !important;
+}
+
+.hasCommand {
+  background: url('iPhoneArrow.png') no-repeat right;
+  cursor: pointer;
+}
+
+.header {
+  color: white;
+  vertical-align: middle;
+  background: url('iPhoneToolbar.png') #6d84a2 repeat-x;
+}
+
+.logo {
+  background: url('logo.png') no-repeat top left;
+}
+
+.snippit {
+  font-weight: normal;
+}
+
+body {
+  background: url('background.png') silver repeat;
+  overflow-x:hidden;
+  -webkit-user-select: none;
+  -webkit-text-size-adjust: none;
+
+}
+
+.whiteButton,
+.grayButton {
+    display: block;
+    border-width: 0 12px;
+    padding: 10px;
+    text-align: center;
+    font-size: 20px;
+    font-weight: normal;
+}
+
+.whiteButton {
+    -webkit-border-image: url(whiteButton.png) 0 12 0 12;
+    text-shadow: rgba(255, 255, 255, 0.7) 0 1px 0;
+}
+
+.grayButton {
+    -webkit-border-image: url(grayButton.png) 0 12 0 12;
+    color: #C0C0C0;
+}
+
+.blueButton {
+    -webkit-border-image: url(blueButton.png) 0 5 0 5;
+    border-width: 0 5px;
+}
+
+.description {
+  color : cornflowerblue;
+  font-size: 9pt;
+}
+
+.GroupPanel {
+    position: relative;
+    margin: 0 0 20px 0;
+    padding: 0;
+    background: white;
+    -webkit-border-radius: 10px;
+    -moz-border-radius: 10px;
+    border: 1px solid #999999;
+    text-align: right;
+    font-size: 12px;
+}
+
+.GroupHeader {
+    margin: 0 0 8px 14px;
+    font-size: inherit;
+    font-weight: bold;
+    color: #4d4d70;
+    text-shadow: rgba(255, 255, 255, 0.75) 2px 2px 0;
+}
+
+.StatusMessage {
+	margin: 0 0 8px 14px;
+    font-size: inherit;
+    font-weight: bold;
+    color: red;
+}
+
+.EditorRow  {
+    position: relative;
+    min-height: 42px;
+    border-bottom: 1px solid #999999;
+    -webkit-border-radius: 0;
+    text-align: right;
+    width: 100%
+}
+
+.EditorRow:last-child {
+    border-bottom: none !important;
+}
+
+.InputLabel {
+    position: relative;
+	float: left;
+	padding: 0px 10px 0 0px;
+    margin: 0;
+    line-height: 42px;
+	font-size: 13px;
+    font-weight: bold;
+	background: none;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	width: 120px;
+}
+
+.InputBox {
+    float: left;
+    box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+    margin: 0;
+    border: none;
+    padding: 12px 10px 0 10px;
+    height: 42px;
+    background: none;
+	position:relative;
+	width: 130px;
+	-webkit-appearance: none;
+}
+
+.InputError {
+    font-weight: bold;
+    color: red;
+}
+
+.EditorRow > .toggle {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    width: 100px;
+    height: 28px;
+}
+
+.toggle {
+    border: 1px solid #888888;
+    -webkit-border-radius: 6px;
+    background: #FFFFFF url(toggle.png) repeat-x;
+    font-size: 19px;
+    font-weight: bold;
+    line-height: 30px;
+}
+
+.toggle[toggled="true"] {
+    border: 1px solid #143fae;
+    background: #194fdb url(toggleOn.png) repeat-x;
+}
+
+.toggleOn {
+    display: none;
+    position: absolute;
+    width: 60px;
+    text-align: center;
+    left: 0;
+    top: 0;
+    color: #FFFFFF;
+    text-shadow: rgba(0, 0, 0, 0.4) 0px -1px 0;
+}
+
+.toggleOff {
+    position: absolute;
+    width: 60px;
+    text-align: center;
+    right: 0;
+    top: 0;
+    color: #666666;
+}
+
+.toggle[toggled="true"] > .toggleOn {
+    display: block;
+}
+
+.toggle[toggled="true"] > .toggleOff {
+    display: none;
+}
+
+.thumb {
+    position: absolute;
+    top: -1px;
+    left: -1px;
+    width: 40px;
+    height: 28px;    
+    border: 1px solid #888888;
+    -webkit-border-radius: 6px;
+    background: #ffffff url(thumb.png) repeat-x;
+}
+
+.toggle[toggled="true"] > .thumb {
+    left: auto;
+    right: -1px;
+}

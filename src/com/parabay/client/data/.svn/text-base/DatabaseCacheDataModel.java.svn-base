@@ -1,0 +1,107 @@
+package com.parabay.client.data;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import com.google.gwt.gears.client.database.DatabaseException;
+import com.google.gwt.libideas.logging.shared.Log;
+import com.parabay.client.api.Globals;
+import com.parabay.client.api.data.IDataEvent;
+import com.parabay.client.api.data.IDataEventManager;
+import com.parabay.client.api.data.IDataModel;
+import com.parabay.client.api.data.offline.IClientDatabase;
+import com.parabay.client.data.offline.DatabaseColumn;
+import com.parabay.client.data.offline.DatabaseTable;
+import com.parabay.client.utils.JSONCodec;
+
+public class DatabaseCacheDataModel extends HashMap<String, Object> implements IDataModel {
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 7005671536625999522L;
+	
+	private DatabaseTable cacheTable;
+	private JSONCodec jsonCodec = new JSONCodec();
+	
+	public DatabaseCacheDataModel() {
+		super();
+		
+		try {
+			IClientDatabase clientDatabase = Globals.getInstance().getClientDatabase();
+			clientDatabase.open();
+			
+			cacheTable = new DatabaseTable("cache", clientDatabase);
+			DatabaseColumn []columns = { new DatabaseColumn("key", "text", true, null), 
+												new DatabaseColumn("value", "text")};
+			
+			cacheTable.initialize(columns);
+		
+			cacheTable.createTable();
+		} catch (DatabaseException e) {
+			Log.severe(e.getMessage());
+		}
+	}
+
+	@Override
+	public Object get(Object arg0) {
+		
+		Object ret = null;
+		try {
+			Map<String, Object> o = cacheTable.find((String) arg0);
+			ret = o.get("value");
+		} catch (DatabaseException e) {
+			Log.severe(e.getMessage());
+		}
+	
+		if (null == ret) {
+			ret = super.get(arg0);
+		}
+		return ret;
+	}
+
+	public Map<String, Object> getJSONObject(Object arg0) {
+		Map<String, Object> o = null;
+		
+		String json = (String) this.get(arg0);
+		if (null != json) {
+			o = (Map<String, Object>) jsonCodec.decode(json);
+		}
+		
+		return o;
+	}
+	
+	public Object putJSONObject(String arg0, Object arg1) {
+		Object ret = null;
+		
+		ret = jsonCodec.encode(arg1);
+		ret = this.put(arg0, ret);
+		
+		return ret;
+	}
+	
+	@Override
+	public Object put(String arg0, Object arg1) {
+		
+		Object ret			= super.put(arg0, arg1);
+		
+		Map<String, Object> o= new HashMap<String, Object>();
+		o.put("key", arg0);
+		o.put("value", arg1);
+		
+		try {
+			cacheTable.insert(o);
+		} catch (DatabaseException e) {
+			Log.severe(e.getMessage());
+		}
+
+		IDataEvent event	= new DataEvent(arg0);
+		event.setValue(arg1);
+		
+		IDataEventManager dataEventManager = Globals.getInstance().getDataEventManager();
+		dataEventManager.fireEvent(event);
+		
+		return ret;
+	}
+	
+}

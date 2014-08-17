@@ -1,0 +1,173 @@
+package com.parabay.client.ui.components.entities;
+
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+
+import com.google.gwt.user.client.Command;
+import com.google.gwt.user.client.History;
+import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.VerticalPanel;
+import com.parabay.client.api.Globals;
+import com.parabay.client.api.data.IDataCollectionPager;
+import com.parabay.client.api.data.IDataEvent;
+import com.parabay.client.api.data.IDataEventHandler;
+import com.parabay.client.api.ui.IDisplayComponent;
+import com.parabay.client.api.ui.IDisplayHost;
+import com.parabay.client.api.ui.INavigationManager;
+import com.parabay.client.services.wrappers.MobileLayoutWrapper;
+import com.parabay.client.services.wrappers.PageMetadataWrapper;
+import com.parabay.client.ui.components.PanelLabel;
+import com.parabay.client.utils.Constants;
+import com.parabay.client.utils.SharedUtils;
+
+public class EntityList implements IDataEventHandler, IDisplayComponent {
+
+	private IDisplayHost parent;
+	
+	private Map<String, IDataCollectionPager> dataMap;
+	
+	public EntityList(IDisplayHost parent) {
+		super();
+		this.parent = parent;
+	}
+
+	public void refresh() {
+		
+		this.parent.clear();
+		
+		if (null != this.getPager() && null != this.getPager().getData()) {
+	
+			this.parent.getLabel().setText("Item List");
+			
+			PageMetadataWrapper wrapper = (PageMetadataWrapper) this.parent.getPageMetadata().getWrapper();
+			if (wrapper.isValid() && null != wrapper.getMobileLayout()) {
+						
+				MobileLayoutWrapper layout = wrapper.getMobileLayout();
+							
+				List<Object> data = this.getPager().getData();
+				for(int i=0; i< data.size(); i++) {
+	
+					FlowPanel div = new FlowPanel();
+					div.setStyleName("OpaquePanel");
+					VerticalPanel vPanel = new VerticalPanel();
+					div.add(vPanel);
+					
+					HorizontalPanel hPanelTitle = new HorizontalPanel();
+					HorizontalPanel hPanelDesc = new HorizontalPanel();
+					vPanel.add(hPanelTitle);
+					vPanel.add(hPanelDesc);
+					
+					final Map<String, Object> item = (Map<String, Object>) data.get(i);
+	
+					if (null != item && null != layout) {
+						
+						Object []fields = (Object []) layout.getFields();
+						
+						for(Object fieldObj : fields) {
+							Map<String, Object> field = (Map<String, Object>) fieldObj;
+							Map<String, Object> params = (Map<String, Object>) field.get("params");
+						
+							String type = (String) field.get("type");
+							String fieldName = SharedUtils.getStringValue(params, "data");
+							String text = (String) item.get(fieldName);
+							
+							Label lblItem = new Label(text);
+							lblItem.setStyleName(type);
+							
+							if (type.equalsIgnoreCase("title")) {
+								hPanelTitle.add(lblItem);
+							}
+							else if (type.equalsIgnoreCase("description")) {
+								hPanelDesc.add(lblItem);
+							}
+						}		
+					}
+	
+					this.parent.add(new PanelLabel(div, new Command() {
+						
+				        public void execute() {
+				        	INavigationManager navMgr = Globals.getInstance().getNavigationManager();
+				        	
+				    		String token 				= History.getToken();
+				    		Map<String, String> params 	= navMgr.parseTokens(token);
+				    		
+				    		String subPage = parent.getPage();
+				    		subPage = subPage.substring(0, subPage.lastIndexOf('s'));
+				    		
+				    		params.put(Constants.PAGE, subPage);
+				    		if (item.containsKey("id")) {
+				    			params.put("id", (String) item.get("id"));
+				    		}
+				    		
+				    		token = navMgr.serializeTokens(params);
+				    		History.newItem(token);
+				        }
+					}));				
+				}		
+	
+				this.parent.setEditCommand(" + ", "Add entity", new Command() {
+					public void execute() {
+						
+			        	INavigationManager navMgr = Globals.getInstance().getNavigationManager();
+								        	
+			    		String token 				= History.getToken();
+			    		Map<String, String> params 	= navMgr.parseTokens(token);
+			    		
+			    		String subPage = parent.getPage();
+			    		subPage = subPage.substring(0, subPage.lastIndexOf('s'));
+			    		
+			    		params.put(Constants.PAGE, subPage);
+			    		if (params.containsKey("id")) {
+			    			params.remove("id");
+			    		}
+			    		
+			    		token = navMgr.serializeTokens(params);
+			    		History.newItem(token);
+	
+					}
+				});
+			}
+		}
+	}
+
+	public void onDataChanged(IDataEvent event) {
+		
+		this.refresh();
+	}
+
+	public void setDataMap(Map<String, IDataCollectionPager> dataMap) {
+
+		if (null != this.dataMap) {
+			for(Iterator<IDataCollectionPager> i = this.dataMap.values().iterator(); i.hasNext();) {
+				
+				IDataCollectionPager pager = i.next();
+				pager.unRegisterForNotifications(this);
+			}
+		}
+		
+		this.dataMap = dataMap;
+		
+		if (null != this.dataMap) {
+			for(Iterator<IDataCollectionPager> i = this.dataMap.values().iterator(); i.hasNext();) {
+				
+				IDataCollectionPager pager = i.next();
+				pager.registerForNotifications(this);
+			}
+		}
+	}
+
+	protected IDataCollectionPager getPager() {
+		
+		IDataCollectionPager pager = null;
+		
+		//get the first dataquery by default
+		if (null != this.dataMap && this.dataMap.size()>0) {
+			pager = this.dataMap.values().iterator().next();
+		}
+		
+		return pager;
+	}
+}

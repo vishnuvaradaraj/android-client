@@ -1,0 +1,84 @@
+9
+
+dir
+303
+svn+ssh://vishnuv@server.parabay.com/var/svn/parabay/Mobile/src/com/parabay/client
+svn+ssh://vishnuv@server.parabay.com/var/svn
+
+
+
+2008-12-22T22:21:39.835280Z
+303
+vishnuv
+
+
+svn:special svn:externals svn:needs-lock
+
+
+
+
+
+
+
+
+
+
+
+0b620758-fedf-4dd9-a0e0-bf943988d0a5
+
+
+
+
+
+
+0
+
+utils
+dir
+
+services
+dir
+
+Mobile.java
+file
+334
+
+
+
+2009-01-04T02:04:17.875400Z
+ad655ca3771f31dfb79b2b1f621bcfea
+2009-01-04T18:39:27.380417Z
+334
+vishnuv
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+934
+
+api
+dir
+
+data
+dir
+
+ui
+dir
+

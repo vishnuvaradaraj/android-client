@@ -1,0 +1,85 @@
+package com.parabay.client.data.offline;
+
+import java.util.Map;
+
+import com.google.gwt.libideas.logging.shared.Log;
+import com.parabay.client.api.Globals;
+import com.parabay.client.api.data.IDataCollection;
+import com.parabay.client.api.data.IDataEvent;
+import com.parabay.client.api.data.IDataEventHandler;
+import com.parabay.client.api.data.offline.IOfflineDataManager;
+import com.parabay.client.api.services.IRunnable;
+import com.parabay.client.api.services.IWorkItem;
+import com.parabay.client.data.PageMetadata;
+import com.parabay.client.services.WorkItem;
+import com.parabay.client.services.wrappers.PageMetadataWrapper;
+import com.parabay.client.utils.Constants;
+import com.parabay.client.utils.SharedUtils;
+
+public class LoadPageMetadata implements IRunnable {
+
+	private String name;
+	private boolean isEditorPage;
+	private IOfflineDataManager offlineDataMgr;
+	private PageMetadata pageMetadata;
+	
+	public LoadPageMetadata(IOfflineDataManager offlineDataMgr, String name, boolean isEditorPage) {
+		super();
+		this.name = name;
+		this.offlineDataMgr = offlineDataMgr;
+	}
+	
+	public void execute(final IWorkItem workItem) {
+		
+		this.pageMetadata = Globals.getInstance().getPageMetadataForViewMap(
+				Globals.getInstance().getApp(), name);
+
+		this.pageMetadata.load(new IDataEventHandler() {
+
+			public void onDataChanged(IDataEvent event) {
+
+				try {
+					Globals.getInstance().getDatabaseCacheModel().putJSONObject(event.getType(), pageMetadata.getWrapper().getData());
+					
+					if (isEditorPage) {
+						return;
+					}
+					
+					offlineDataMgr.getProgressCallback().setPercentageCompleted(25);
+					
+					PageMetadataWrapper wrapper = (PageMetadataWrapper) pageMetadata
+							.getWrapper();
+					
+					Object[] dataQueries = wrapper.getDataQueries();
+					if (null != dataQueries) {
+	
+						for (int i = 0; i < dataQueries.length; i++) {
+	
+							Map<String, Object> dataQuery = (Map<String, Object>) dataQueries[i];
+	
+							String queryName = (String) SharedUtils.getValue(dataQuery,
+							"name");
+							String typeOf = (String) SharedUtils.getValue(
+									dataQuery, "type_of");
+			
+							final IDataCollection dc = Globals.getInstance()
+									.getDataCollectionForDataQuery(
+											Globals.getInstance().getApp(), queryName,
+											typeOf);
+							
+							LoadDataCollectionMetadata ldcm = new LoadDataCollectionMetadata(offlineDataMgr, dc, name);
+							WorkItem wi1 = new WorkItem(ldcm);
+							Globals.getInstance().getWorkerQueue(Constants.DATA_SYNC).add(wi1);
+							
+						}
+					}
+				}
+				finally {
+					workItem.setFinished(true);
+				}
+			}
+		});
+		
+	}
+
+}

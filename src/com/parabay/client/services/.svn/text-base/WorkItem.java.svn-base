@@ -1,0 +1,42 @@
+package com.parabay.client.services;
+
+import com.parabay.client.api.services.IWorkItem;
+import com.parabay.client.api.services.IRunnable;
+
+public class WorkItem implements IWorkItem {
+
+	protected boolean finished;
+	protected boolean started;
+	protected IRunnable runnable;
+	
+	public WorkItem(IRunnable runnable) {
+		super();
+		this.finished = false;
+		this.started = false;
+		this.runnable = runnable;
+	}
+
+	public void run() {
+		
+		this.setStarted(true);
+		if (null != this.runnable) {
+			this.runnable.execute(this);
+		}
+	}
+
+	public boolean isFinished() {
+		return finished;
+	}
+
+	public void setFinished(boolean finished) {
+		this.finished = finished;
+	}
+
+	public boolean isStarted() {
+		return started;
+	}
+
+	public void setStarted(boolean started) {
+		this.started = started;
+	}
+}

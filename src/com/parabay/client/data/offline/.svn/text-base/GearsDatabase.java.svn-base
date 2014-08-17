@@ -1,0 +1,68 @@
+package com.parabay.client.data.offline;
+
+import com.google.gwt.core.client.JavaScriptException;
+import com.google.gwt.gears.client.Factory;
+import com.google.gwt.gears.client.GearsException;
+import com.google.gwt.gears.client.database.Database;
+import com.google.gwt.gears.client.database.DatabaseException;
+import com.google.gwt.gears.client.database.ResultSet;
+import com.google.gwt.libideas.logging.shared.Log;
+import com.parabay.client.api.data.offline.IClientDatabase;
+
+public class GearsDatabase implements IClientDatabase {
+
+	protected Database db;
+	
+	public GearsDatabase() {
+		try {      
+			db = Factory.getInstance().createDatabase();      
+		} catch (JavaScriptException e) {
+			Log.warning(e.getMessage());
+		}
+	}
+
+	public void close() throws DatabaseException {
+		if (this.db != null) {
+			this.db.close();
+		}
+	}
+
+	public ResultSet execute(String sqlStatement, String... args)
+			throws DatabaseException {
+
+		if (this.db != null) {
+			Log.info(sqlStatement);
+			return this.db.execute(sqlStatement, args);
+		}
+		return null;
+	}
+
+	public int getLastInsertRowId() {
+
+		if (this.db != null) {
+			return this.db.getLastInsertRowId();
+		}
+		return 0;
+	}
+
+	public int getRowsAffected() {
+
+		if (this.db != null) {
+			return this.db.getRowsAffected();
+		}
+		return 0;
+	}
+
+	public void open() {
+
+		if (this.db != null) {
+			this.db.open();
+		}
+	}
+
+	public void open(String name) {
+		if (this.db != null) {
+			this.db.open(name);
+		}
+	}
+}

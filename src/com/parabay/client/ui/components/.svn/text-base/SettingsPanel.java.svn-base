@@ -1,0 +1,181 @@
+package com.parabay.client.ui.components;
+
+import com.google.gwt.core.client.JavaScriptException;
+import com.google.gwt.gears.client.Factory;
+import com.google.gwt.gears.client.GearsException;
+import com.google.gwt.gears.client.localserver.LocalServer;
+import com.google.gwt.gears.client.localserver.ManagedResourceStore;
+import com.google.gwt.gears.offline.client.Offline;
+import com.google.gwt.user.client.Cookies;
+import com.google.gwt.user.client.Timer;
+import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.ClickListener;
+import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.Hyperlink;
+import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.Widget;
+import com.parabay.client.api.Globals;
+import com.parabay.client.services.commands.LogoutCommand;
+import com.parabay.client.utils.Constants;
+
+public class SettingsPanel extends WallToWallPanel {
+
+	private LocalePicker localePicker;
+	private ThemePicker themePicker;
+
+	private final Label statusLabel = new Label();
+	private final Button createManagedResourceStoreButton = new Button(
+			"Go Offline");
+
+	private final Button removeManagedResourceStoreButton = new Button(
+			"Go Online");
+
+	public SettingsPanel(WallToWallPanel parent) {
+
+		super("Settings...", parent);
+		addStyleName("SettingsPanel");
+
+		this.setPage(Constants.SETTINGS);
+		this.refresh();
+	}
+
+	protected String getShortTitle() {
+		return l10n("Settings");
+	}
+
+	@Override
+	public void refresh() {
+		this.localePicker = new LocalePicker();
+		this.themePicker = new ThemePicker(this);
+
+		String loginToken = Globals.getInstance().getNavigationManager()
+				.getTokenForPage(Constants.LOGIN);
+		Hyperlink logoutLink = new Hyperlink(l10n("Logout"), loginToken);
+		logoutLink.addClickListener(new ClickListener() {
+
+			public void onClick(Widget sender) {
+
+				String token = Globals.getInstance().getToken();
+				Globals.getInstance().getModel().put(Constants.USER, null);
+				Cookies.setCookie("token", null);
+
+				if (null != token && token.length() > 0) {
+					LogoutCommand logoutCmd = new LogoutCommand(token);
+					logoutCmd.execute();
+				}
+			}
+		});
+
+		add(new PanelLabel(logoutLink, null));
+
+		String aboutToken = Globals.getInstance().getNavigationManager()
+				.getTokenForPage(Constants.ABOUT);
+		add(new PanelLabel(new Hyperlink(l10n("About"), aboutToken), null));
+
+		HorizontalPanel hPanel = new HorizontalPanel();
+		hPanel.setSpacing(10);
+		hPanel.add(createManagedResourceStoreButton);
+
+		// See if we're already running from a ManagedResourceStore
+		try {
+			LocalServer server = Factory.getInstance().createLocalServer();
+
+			// This check to see if the host page can be served locally
+			if (server.canServeLocally(Window.Location.getPath())) {
+				createManagedResourceStoreButton.setText("Refresh App");
+
+				// Give the user an opportunity to delete the MRS
+				hPanel.add(removeManagedResourceStoreButton);
+			}
+		} catch (GearsException e) {
+			// Gears probably isn't available (e.g. hosted mode)
+			createManagedResourceStoreButton.setEnabled(false);
+			removeManagedResourceStoreButton.setEnabled(false);
+		} catch (JavaScriptException e) {
+			// User denied access to Gears.
+			createManagedResourceStoreButton.setEnabled(false);
+			removeManagedResourceStoreButton.setEnabled(false);
+		}
+		
+		createManagedResourceStoreButton.addClickListener(new ClickListener() {
+			public void onClick(Widget sender) {
+				statusLabel.setText("Starting update");
+				createManagedResourceStore();
+			}
+		});
+
+		removeManagedResourceStoreButton.addClickListener(new ClickListener() {
+			public void onClick(Widget sender) {
+				removeManagedResourceStore();
+			}
+		});
+
+		hPanel.add(statusLabel);
+
+		add(new PanelLabel(hPanel, null));
+
+		add(new PanelLabel(this.localePicker.initialize(), null));
+		add(new PanelLabel(this.themePicker.initialize(), null));
+	}
+
+	private void removeManagedResourceStore() {
+		try {
+			LocalServer server = Factory.getInstance().createLocalServer();
+			ManagedResourceStore store = Offline.getManagedResourceStore();
+			server.removeManagedStore(store.getName());
+			statusLabel
+					.setText("Removed ManagedResourceStore.  Press Refresh to see Online version.");
+			createManagedResourceStoreButton.setEnabled(false);
+			removeManagedResourceStoreButton.setEnabled(false);
+		} catch (GearsException e) {
+			statusLabel.setText(e.getMessage());
+		}
+
+	}
+
+	private void createManagedResourceStore() {
+		try {
+			final ManagedResourceStore managedResourceStore = Offline
+					.getManagedResourceStore();
+
+			new Timer() {
+				final String oldVersion = managedResourceStore
+						.getCurrentVersion();
+
+				@Override
+				public void run() {
+					switch (managedResourceStore.getUpdateStatus()) {
+					case ManagedResourceStore.UPDATE_OK:
+						if (managedResourceStore.getCurrentVersion().equals(
+								oldVersion)) {
+							statusLabel.setText("No update was available.");
+						} else {
+							statusLabel
+									.setText("Update to "
+											+ managedResourceStore
+													.getCurrentVersion()
+											+ " was completed.  Please refresh the page to see the changes.");
+							createManagedResourceStoreButton.setEnabled(false);
+						}
+						break;
+					case ManagedResourceStore.UPDATE_CHECKING:
+					case ManagedResourceStore.UPDATE_DOWNLOADING:
+						statusLabel.setText("Transferring data");
+						schedule(500);
+						break;
+					case ManagedResourceStore.UPDATE_FAILED:
+						statusLabel.setText(managedResourceStore
+								.getLastErrorMessage());
+						break;
+					}
+				}
+			}.schedule(500);
+
+		} catch (GearsException e) {
+			statusLabel.setText("");
+			Window.alert(e.getMessage());
+		}
+	}
+
+}

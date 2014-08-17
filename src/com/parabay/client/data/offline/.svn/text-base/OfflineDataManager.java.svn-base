@@ -1,0 +1,76 @@
+package com.parabay.client.data.offline;
+
+import java.util.Map;
+
+import com.google.gwt.libideas.logging.shared.Log;
+import com.parabay.client.api.Globals;
+import com.parabay.client.api.data.IDataEvent;
+import com.parabay.client.api.data.IDataEventHandler;
+import com.parabay.client.api.data.offline.IOfflineDataManager;
+import com.parabay.client.api.services.IProgressNotification;
+import com.parabay.client.data.RootViewMaps;
+import com.parabay.client.services.WorkItem;
+import com.parabay.client.utils.Constants;
+
+public class OfflineDataManager implements IOfflineDataManager {
+
+	private RootViewMaps rootViewMaps;
+
+	private IProgressNotification progressCallback;
+	
+	public OfflineDataManager() {
+		super();
+	}
+
+	public void syncDownload(IProgressNotification caller) {
+		
+		this.rootViewMaps = Globals.getInstance().getRootViewMaps();
+
+		if (this.progressCallback == null) {
+			
+			this.progressCallback = caller;
+			final IOfflineDataManager offlineDataMgr = this;
+			
+			this.rootViewMaps.load(new IDataEventHandler() {
+	
+				public void onDataChanged(IDataEvent event) {
+					if (rootViewMaps.isValid()) {
+	
+						Globals.getInstance().getDatabaseCacheModel().putJSONObject(event.getType(), rootViewMaps.getWrapper().getData());
+
+						final Object[] arr = (Object[]) rootViewMaps.getWrapper()
+							.getValue("data");
+	
+						for (int i = 0; i < arr.length; i++) {
+							
+							Map<String, Object> item = (Map<String, Object>) arr[i];
+							
+							String listPage = (String) item.get("name");
+							LoadPageMetadata lpm1 = new LoadPageMetadata(offlineDataMgr, listPage, false);
+							WorkItem wi1 = new WorkItem(lpm1);
+							Globals.getInstance().getWorkerQueue(Constants.DATA_SYNC).add(wi1);
+							
+							String editorPage = listPage.substring(0, listPage.length()-1);
+							LoadPageMetadata lpm2 = new LoadPageMetadata(offlineDataMgr, editorPage, true);
+							WorkItem wi2 = new WorkItem(lpm2);
+							Globals.getInstance().getWorkerQueue(Constants.DATA_SYNC).add(wi2);
+						}
+					}
+				}
+			});
+		}
+		else {
+			Log.warning("Ignoring sync data request since the previous request is still in progress");
+		}
+	}
+	
+	public void syncUpload(IProgressNotification progressCallback) {
+	
+	}
+
+	public IProgressNotification getProgressCallback() {
+		return progressCallback;
+	}
+	
+	
+}

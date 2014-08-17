@@ -1,0 +1,85 @@
+package com.parabay.client.data.offline;
+
+import java.util.Date;
+
+import com.google.gwt.gears.client.database.DatabaseException;
+import com.google.gwt.gears.client.database.ResultSet;
+import com.parabay.client.api.data.offline.IClientResultSet;
+
+public class GearsResultSet implements IClientResultSet {
+	
+	protected ResultSet rs;
+	
+	public GearsResultSet(ResultSet rs) {
+		this.rs = rs;
+	}
+	
+	public void close() throws DatabaseException {	
+		this.rs.close();
+	}
+	
+	public byte getFieldAsByte(int fieldIndex) throws DatabaseException {
+		
+		return this.rs.getFieldAsByte(fieldIndex);
+	}
+	
+	public char getFieldAsChar(int fieldIndex) throws DatabaseException {
+		
+		return this.rs.getFieldAsChar(fieldIndex);
+	}
+	
+	public Date getFieldAsDate(int fieldIndex) throws DatabaseException {
+		
+		return this.rs.getFieldAsDate(fieldIndex);
+	}
+	
+	public double getFieldAsDouble(int fieldIndex) throws DatabaseException {
+		
+		return this.rs.getFieldAsDouble(fieldIndex);
+	}
+	
+	public float getFieldAsFloat(int fieldIndex) throws DatabaseException {
+		
+		return this.rs.getFieldAsFloat(fieldIndex);
+	}
+	
+	public int getFieldAsInt(int fieldIndex) throws DatabaseException {
+		
+		return this.rs.getFieldAsInt(fieldIndex);
+	}
+
+	public long getFieldAsLong(int fieldIndex) throws DatabaseException {
+		
+		return this.rs.getFieldAsLong(fieldIndex);
+	}
+	
+	public short getFieldAsShort(int fieldIndex) throws DatabaseException {
+		
+		return this.rs.getFieldAsShort(fieldIndex);
+	}
+
+	public String getFieldAsString(int fieldIndex) throws DatabaseException {
+		
+		return this.rs.getFieldAsString(fieldIndex);
+	}
+	
+	public int getFieldCount() {
+		
+		return this.rs.getFieldCount();
+	}
+
+	public String getFieldName(int fieldIndex) throws DatabaseException {
+		
+		return this.rs.getFieldName(fieldIndex);
+	}
+
+	public boolean isValidRow() {
+		
+		return this.rs.isValidRow();
+	}
+
+	public void next() {
+		
+		this.rs.next();
+	}
+}

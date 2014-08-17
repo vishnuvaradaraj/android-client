@@ -1,0 +1,301 @@
+package com.parabay.client.api;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import com.google.gwt.i18n.client.LocaleInfo;
+import com.google.gwt.user.client.Cookies;
+import com.parabay.client.api.data.IDataCollection;
+import com.parabay.client.api.data.IDataCollectionPager;
+import com.parabay.client.api.data.IDataEventManager;
+import com.parabay.client.api.data.IDataModel;
+import com.parabay.client.api.data.offline.IClientDatabase;
+import com.parabay.client.api.data.offline.IOfflineDataManager;
+import com.parabay.client.api.services.IServiceManager;
+import com.parabay.client.data.DataCollection;
+import com.parabay.client.data.DataCollectionPager;
+import com.parabay.client.data.DataEventManager;
+import com.parabay.client.data.DatabaseCacheDataModel;
+import com.parabay.client.data.GlobalDataModel;
+import com.parabay.client.data.L10n;
+import com.parabay.client.data.PageMetadata;
+import com.parabay.client.data.PersonalDataModel;
+import com.parabay.client.data.RootViewMaps;
+import com.parabay.client.data.offline.GearsDatabase;
+import com.parabay.client.data.offline.OfflineDataManager;
+import com.parabay.client.services.ServiceManager;
+import com.parabay.client.services.WorkerQueue;
+import com.parabay.client.services.wrappers.UserInfoWrapper;
+import com.parabay.client.ui.components.entities.EntityEditor;
+import com.parabay.client.ui.managers.NavigationManager;
+import com.parabay.client.ui.managers.PageTypeManager;
+import com.parabay.client.ui.validation.client.Validator;
+import com.parabay.client.ui.validation.client.validator.IntRangeValidator;
+import com.parabay.client.ui.validation.client.validator.RegExValidator;
+import com.parabay.client.ui.validation.client.validator.RequiredValidator;
+import com.parabay.client.utils.Constants;
+import com.parabay.client.utils.SharedUtils;
+import com.parabay.client.api.ui.IFieldEditor;
+import com.parabay.client.api.ui.INavigationManager;
+import com.parabay.client.api.ui.IPageTypeManager;
+import com.parabay.client.ui.components.entities.fieldeditors.BooleanFieldEditor;
+import com.parabay.client.ui.components.entities.fieldeditors.DateFieldEditor;
+import com.parabay.client.ui.components.entities.fieldeditors.TextFieldEditor;
+
+public class Globals  {
+
+	static private Globals instance;
+	
+	static public Globals getInstance() {
+		
+	    if (null == instance){
+	    	instance	= new Globals();
+	    }
+	    return instance;
+	}
+
+	public String getApp() {
+
+		String app	= this.getNavigationManager().getTokenValue(Constants.APP);		
+		return app;
+	}
+	
+	public String getCurrentLocale() {
+
+		String currentLocale = LocaleInfo.getCurrentLocale().getLocaleName();
+		if (currentLocale.equals("default")) {
+			currentLocale = "en";
+		}
+		return currentLocale;
+	}
+	
+	public String getToken() {
+		String token = "";
+		
+		UserInfoWrapper wrapper = (UserInfoWrapper) this.getModel().get(Constants.USER);
+		if (null != wrapper) {
+			token = wrapper.getToken();
+		}
+		
+		if (token==null || token.length() == 0) {
+			token = Cookies.getCookie("token");
+		}
+
+		if (token==null || token.length() == 0) {
+			token = "";
+		}
+
+		return token;
+	}
+	
+	private IDataModel	model;
+	
+	public IDataModel getModel() {
+		
+	    if (null == model){
+	    	model	= new GlobalDataModel();
+	    }
+	    
+	    return model;
+	}
+	
+	private IDataModel databaseCacheModel;
+	
+	public DatabaseCacheDataModel getDatabaseCacheModel() {
+		if (null == this.databaseCacheModel) {
+			this.databaseCacheModel = new DatabaseCacheDataModel();
+		}
+		return (DatabaseCacheDataModel) databaseCacheModel;
+	}
+
+	private IDataModel	personalData;
+	
+	public IDataModel getPersonalData() {
+		
+	    if (null == personalData){
+	    	personalData	= new PersonalDataModel();
+	    }
+	    
+	    return personalData;
+	}
+	
+	private IServiceManager serviceManager;
+
+	public IServiceManager getServiceManager() {
+		if (null == serviceManager){
+			serviceManager	= new ServiceManager();
+	    }
+		
+		return serviceManager;
+	}
+	
+	private IDataEventManager dataEventManager;
+
+	public IDataEventManager getDataEventManager() {
+		if (null == dataEventManager){
+			dataEventManager	= new DataEventManager();
+	    }
+		
+		return dataEventManager;
+	}
+	
+	private INavigationManager navigationManager;
+
+	public INavigationManager getNavigationManager() {
+		if (null == navigationManager){
+			navigationManager	= new NavigationManager();
+	    }
+		return navigationManager;
+	}
+	
+	private RootViewMaps	rootViewMaps;
+	public RootViewMaps getRootViewMaps() {
+		if (null == rootViewMaps){
+			rootViewMaps	= new RootViewMaps();
+			
+			this.getModel().put(Constants.ROOT_VIEWS, rootViewMaps);
+	    }
+		
+		return rootViewMaps;
+	}
+	
+	private IPageTypeManager pageTypeManager;
+	public IPageTypeManager getPageTypeManager() {
+		if (null == pageTypeManager){
+			pageTypeManager	= new PageTypeManager();			
+	    }
+		
+		return pageTypeManager;
+	}
+	
+	public L10n getL10n(String app, String page, String locale) {
+		
+		String key = L10n.formatDataKey(app, page, locale);
+		L10n l10n = (L10n) this.getModel().get(key);
+		
+		if (null == l10n) {
+			l10n = new L10n(page);
+			this.getModel().put(key, l10n);
+		}
+		
+		return l10n;
+	}
+	
+	public PageMetadata getPageMetadataForViewMap(String app, String page) {
+		
+		PageMetadata pageMetadata = null;
+		
+		String key = PageMetadata.formatDataKey(app, page);
+		pageMetadata = (PageMetadata) this.getModel().get(key);
+		
+		if (null == pageMetadata) {
+			pageMetadata = new PageMetadata(page);
+			this.getModel().put(key, pageMetadata);
+		}
+		
+		return pageMetadata;
+	}
+
+	public IDataCollection getDataCollectionForDataQuery(String app, String name, String kind) {
+		
+		String key = DataCollection.formatDataKey(app, name);
+		IDataCollection dataCollection = (IDataCollection) this.getModel().get(key);
+		
+		if (null == dataCollection) {
+			dataCollection = new DataCollection(name);
+			dataCollection.getQuery().setKind(kind);
+			this.getModel().put(key, dataCollection);
+		}
+		
+		return dataCollection;
+	}
+	
+	public IDataCollectionPager getDataCollectionPager(String app, String name, IDataCollection dc) {
+		
+		String key = DataCollectionPager.formatDataKey(app, name);
+		IDataCollectionPager dataCollectionPager = (IDataCollectionPager) this.getModel().get(key);
+		
+		if (null == dataCollectionPager) {
+			dataCollectionPager = new DataCollectionPager(name, dc);
+			this.getModel().put(key, dataCollectionPager);
+		}
+		
+		return dataCollectionPager;
+	}
+	
+	public IFieldEditor getFieldEditor(Map<String, Object> field, EntityEditor entityEditor) {
+		IFieldEditor ret = null;
+		
+		String fieldType = SharedUtils.getStringValue(field, "type");
+		
+		if (fieldType.equals("text") || fieldType.equals("string") || fieldType.equals("integer")) {
+			ret = new TextFieldEditor(field, entityEditor);
+		}
+		else if (fieldType.equals("timestamp")) {
+			ret = new DateFieldEditor(field, entityEditor);
+		}
+		else if (fieldType.equals("bool")) {
+			ret = new BooleanFieldEditor(field, entityEditor);
+		}
+		
+		return ret;
+	}
+	
+	public Validator getValidator(Map<String, Object> validator) {
+		Validator ret = null;
+
+		String type = SharedUtils.getStringValue(validator, "type");
+		
+		if (type.equals("required")) {
+			ret = new RequiredValidator();
+		}
+		else if (type.equals("range")) {
+			int min = (Integer)SharedUtils.getValue(validator, "min");
+			int max = (Integer)SharedUtils.getValue(validator, "max");
+			ret = new IntRangeValidator(min, max);
+		}
+		else if (type.equals("regex")) {
+			
+			String matches = SharedUtils.getStringValue(validator, "matches");
+			if (null != type && null != matches) {
+				ret = new RegExValidator(matches);
+			}
+		}
+		
+		return ret;
+	}
+	
+	private Map<String, WorkerQueue> workerQueues = new HashMap<String, WorkerQueue>();
+
+	public WorkerQueue getWorkerQueue(String name) {
+		
+		WorkerQueue workerQueue = workerQueues.get(name);
+		if (null == workerQueue){
+			workerQueue	= new WorkerQueue();
+			workerQueues.put(name, workerQueue);
+	    }
+		
+		return workerQueue;
+	}
+	
+	private IOfflineDataManager offlineDataManager;
+
+	public IOfflineDataManager getOfflineDataManager() {
+		if (null == offlineDataManager) {
+			this.offlineDataManager = new OfflineDataManager();
+		}
+		return offlineDataManager;
+	}
+	
+	IClientDatabase clientDatabase;
+	
+	public IClientDatabase getClientDatabase() {
+		
+		if (null == this.clientDatabase) {
+			this.clientDatabase = new GearsDatabase();
+		}
+		return clientDatabase;
+	}
+
+	
+}
